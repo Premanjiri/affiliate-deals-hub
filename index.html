@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Affiliate Deals Hub</title>
+    <style>
+        /* --- 1. RESET & BASIC STYLES --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        /* --- 2. HEADER SECTION --- */
+        header {
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        /* Top Bar: Logo, Search, Hamburger */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff4500; /* Affiliate Orange/Red */
+            margin-right: 20px;
+        }
+
+        .search-container {
+            flex-grow: 1;
+            margin: 0 20px;
+            display: flex;
+        }
+
+        .search-container input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px 0 0 4px;
+            outline: none;
+        }
+
+        .search-container button {
+            padding: 10px 20px;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+        }
+
+        /* Auth Links for Desktop */
+        .auth-links {
+            display: flex;
+            align-items: center;
+            margin-left: 20px;
+            white-space: nowrap;
+        }
+
+        .auth-links a {
+            margin-left: 15px;
+            font-weight: bold;
+            font-size: 14px;
+            color: #333;
+            cursor: pointer;
+        }
+        
+        .auth-links .signup-btn {
+            background-color: #ff4500;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+
+        .auth-links .signup-btn:hover {
+            background-color: #e03e00;
+        }
+
+        /* Hidden on desktop by default */
+        .hamburger-btn {
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+            display: none; 
+        }
+
+        /* Main Menu (Horizontal) */
+        .main-menu {
+            background-color: #232f3e;
+            color: white;
+        }
+
+        .main-menu ul {
+            display: flex;
+            overflow-x: auto; /* Allows scrolling if menu is too long */
+            max-width: 1200px;
+            margin: 0 auto;
+            white-space: nowrap;
+        }
+
+        .main-menu li a {
+            display: block;
+            padding: 12px 15px;
+            color: white;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .main-menu li a:hover {
+            background-color: #ff4500;
+        }
+
+        /* --- 3. HAMBURGER DROPDOWN MENU --- */
+        .mobile-side-menu {
+            position: fixed;
+            top: 0;
+            right: -250px; /* Hidden by default */
+            width: 250px;
+            height: 100%;
+            background-color: white;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.2);
+            transition: 0.3s;
+            z-index: 1100;
+            padding-top: 60px;
+        }
+
+        .mobile-side-menu.active {
+            right: 0;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 30px;
+            cursor: pointer;
+        }
+
+        .mobile-side-menu a {
+            display: block;
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .mobile-side-menu a:hover {
+            background-color: #f9f9f9;
+            color: #ff4500;
+        }
+
+        /* Overlay for background when menu opens */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            z-index: 1050;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        /* --- 4. HERO SLIDER --- */
+        .slider-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            position: relative;
+            height: 300px;
+            overflow: hidden;
+            border-radius: 8px;
+        }
+
+        .slide {
+            width: 100%;
+            height: 100%;
+            display: none; /* Hidden by default */
+            background-size: cover;
+            background-position: center;
+        }
+
+        .slide.active {
+            display: block;
+        }
+
+        .slider-text {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+        }
+
+        /* --- 5. MAIN CONTENT LAYOUT --- */
+        .content-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            gap: 20px;
+            padding: 0 10px;
+            margin-bottom: 40px;
+        }
+
+        /* Left Side: Products */
+        .products-section {
+            flex: 3; /* Takes up 75% approx */
+        }
+
+        .section-title {
+            margin-bottom: 15px;
+            font-size: 20px;
+            border-bottom: 2px solid #ff4500;
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* 4 products per row desktop */
+            gap: 15px;
+        }
+
+        .product-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 10px;
+            text-align: center;
+            transition: transform 0.2s;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+
+        .product-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            height: 40px; /* Limit height */
+            overflow: hidden;
+        }
+
+        .product-price {
+            color: #b12704;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .shop-btn {
+            display: block;
+            margin-top: 10px;
+            background-color: #ffca28;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        /* Right Side: Sidebar */
+        .sidebar {
+            flex: 1; /* Takes up 25% approx */
+        }
+
+        .deal-of-day {
+            background: white;
+            border: 1px solid #ff4500;
+            border-radius: 6px;
+            padding: 15px;
+            text-align: center;
+            position: sticky;
+            top: 120px; /* Stays visible while scrolling */
+        }
+
+        .deal-badge {
+            background: #ff4500;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        /* --- 6. AUTH MODAL STYLES --- */
+        .auth-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .auth-modal {
+            background: white;
+            width: 90%;
+            max-width: 400px;
+            padding: 30px;
+            border-radius: 8px;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .close-auth {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .auth-step h2 {
+            margin-bottom: 20px;
+            color: #232f3e;
+            text-align: center;
+        }
+
+        .auth-step input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .auth-action-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #ff4500;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .auth-action-btn:hover {
+            background-color: #e03e00;
+        }
+
+        .form-footer {
+            text-align: right;
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+
+        .form-footer a {
+            color: #0088cc;
+        }
+
+        .switch-auth {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .switch-auth a {
+            color: #ff4500;
+            font-weight: bold;
+        }
+        
+        /* Loading Spinner */
+        .loader {
+            border: 5px solid #f3f3f3; border-top: 5px solid #ff4500; border-radius: 50%;
+            width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 50px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* --- 7. FOOTER --- */
+        footer {
+            background-color: #232f3e;
+            color: #ddd;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .footer-links a {
+            margin: 0 10px;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .footer-links {
+            margin-bottom: 20px;
+        }
+
+        /* --- 8. MOBILE RESPONSIVENESS --- */
+        @media (max-width: 768px) {
+            /* Adjust Top Bar */
+            .logo { font-size: 20px; }
+            .search-container { display: none; /* Hide search on small mobile to save space, or make icon */ }
+            
+            /* Show Hamburger on Mobile, Hide Auth Links */
+            .hamburger-btn { display: block; }
+            .auth-links { display: none; }
+
+            /* Adjust Layout */
+            .content-wrapper {
+                flex-direction: column; /* Stack sidebar below products */
+            }
+
+            .products-section { width: 100%; }
+            .sidebar { width: 100%; }
+
+            /* Mobile Product Grid: 3 items per row */
+            .product-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 5px; /* Tighter gap for mobile */
+            }
+
+            .product-card {
+                padding: 5px;
+            }
+            
+            .product-card img {
+                height: 80px; /* Smaller images */
+            }
+
+            .product-title {
+                font-size: 11px;
+                height: 30px;
+            }
+            
+            .shop-btn {
+                font-size: 11px;
+                padding: 4px;
+            }
+
+            .deal-of-day {
+                position: static; /* Remove sticky on mobile */
+                margin-top: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Mobile Menu Overlay -->
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+    <!-- Auth Modal Overlay -->
+    <div class="auth-overlay" id="authOverlay" style="display: none;">
+        <div class="auth-modal">
+            <span class="close-auth" onclick="closeAuthModal()">&times;</span>
+            
+            <!-- Login Form -->
+            <div id="loginForm" class="auth-step">
+                <h2>Log In</h2>
+                <form onsubmit="handleLoginSubmit(event)">
+                    <input type="text" placeholder="Email or Phone Number" required>
+                    <input type="password" placeholder="Password" required>
+                    <div class="form-footer">
+                        <a href="#" onclick="alert('Password reset link sent to your email.')">Forgot Password?</a>
+                    </div>
+                    <button type="submit" class="auth-action-btn">Log In</button>
+                </form>
+                <p class="switch-auth">New here? <a href="#" onclick="openSignup()">Create an account</a></p>
+            </div>
+
+            <!-- Signup Form -->
+            <div id="signupForm" class="auth-step" style="display:none;">
+                <h2>Sign Up</h2>
+                <form onsubmit="handleSignupSubmit(event)">
+                    <input type="text" placeholder="Full Name" required>
+                    <input type="text" placeholder="Email or Phone Number" required>
+                    <input type="password" placeholder="Password" required>
+                    <button type="submit" class="auth-action-btn">Sign Up</button>
+                </form>
+                <p class="switch-auth">Already have an account? <a href="#" onclick="openLogin()">Log In</a></p>
+            </div>
+
+            <!-- OTP Form -->
+            <div id="otpForm" class="auth-step" style="display:none;">
+                <h2>Verify OTP</h2>
+                <p style="text-align:center; margin-bottom:15px; color:#666;">Enter the code sent to your mobile/email.</p>
+                <form onsubmit="verifyOTP(event)">
+                    <input type="text" placeholder="Enter 6-digit OTP" style="letter-spacing: 5px; text-align: center; font-size: 18px;" maxlength="6" required>
+                    <button type="submit" class="auth-action-btn">Verify</button>
+                </form>
+                <p class="switch-auth"><a href="#" onclick="alert('OTP Resent Successfully!')">Resend OTP</a></p>
+            </div>
+        </div>
+    </div>
+
+    <nav class="mobile-side-menu" id="sideMenu">
+        <span class="close-btn" onclick="toggleMenu()">&times;</span>
+        <div style="padding: 0 20px; margin-bottom: 20px; font-weight:bold;">Categories</div>
+        <a href="#store" onclick="toggleMenu()">All Products</a>
+        <a href="#electronics" onclick="toggleMenu()">Electronics</a>
+        <a href="#fashion" onclick="toggleMenu()">Fashion</a>
+        <a href="#home" onclick="toggleMenu()">Home & Kitchen</a>
+        <div style="padding: 0 20px; margin: 20px 0; font-weight:bold;">User Options</div>
+        <!-- Mobile Auth Links with JS Triggers -->
+        <a href="#" onclick="toggleMenu(); openLogin();">Log In</a>
+        <a href="#" onclick="toggleMenu(); openSignup();">Sign Up</a>
+        <a href="#">Contact Us</a>
+    </nav>
+
+    <header>
+        <div class="top-bar">
+            <a href="#" class="logo">BESTDEALS</a>
+            
+            <div class="search-container">
+                <input type="text" placeholder="Search for products, brands...">
+                <button>Search</button>
+            </div>
+
+            <!-- Login/Signup for Desktop -->
+            <div class="auth-links">
+                <a href="#" onclick="openLogin()">Log In</a>
+                <a href="#" class="signup-btn" onclick="openSignup()">Sign Up</a>
+            </div>
+
+            <!-- Hamburger for Mobile -->
+            <div class="hamburger-btn" onclick="toggleMenu()">
+                &#9776; </div>
+        </div>
+
+        <nav class="main-menu">
+            <ul>
+                <li><a href="#store">All Products</a></li>
+                <li><a href="#electronics">Electronics</a></li>
+                <li><a href="#fashion">Fashion</a></li>
+                <li><a href="#home">Home & Kitchen</a></li>
+                <li><a href="#daily">Daily Deals</a></li>
+                <li><a href="#coupons">Coupons</a></li>
+                <li><a href="#groups">Groups</a></li>
+                <li><a href="#cards">Credit Cards</a></li>
+                <li><a href="#more">More</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="slider-container">
+        <div class="slide active" style="background-image: url('https://placehold.co/1200x300/232f3e/white?text=Top+Products+Sale');">
+            <div class="slider-text">
+                <h2>Big Summer Sale</h2>
+                <p>Up to 50% off on Electronics</p>
+            </div>
+        </div>
+        <div class="slide" style="background-image: url('https://placehold.co/1200x300/ff4500/white?text=Exclusive+Credit+Card+Offers');">
+            <div class="slider-text">
+                <h2>Cashback Rewards</h2>
+                <p>Apply for new cards today</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="content-wrapper">
+        
+        <main class="products-section">
+            <h2 class="section-title" id="sectionTitle">Latest Drops</h2>
+            
+            <div id="loader" class="loader"></div>
+            
+            <div class="product-grid" id="productGrid" style="display:none;">
+                <!-- Javascript will populate products here -->
+            </div>
+            
+            <div id="noResults" style="display:none; text-align:center; padding: 40px; color:#666;">
+                <h3>No products found in this category.</h3>
+                <p>Check back later for new deals!</p>
+                <a href="#store" class="shop-btn" style="display:inline-block; margin-top:10px; background:#333; color:white;">Browse All</a>
+            </div>
+        </main>
+
+        <aside class="sidebar">
+            <div class="deal-of-day">
+                <span class="deal-badge">DEAL OF THE DAY</span>
+                <img src="https://placehold.co/300x300?text=Mega+Deal" style="width:100%; border-radius:4px;">
+                <h3 style="margin:10px 0;">4K Ultra HD Monitor</h3>
+                <p style="text-decoration: line-through; color:#999;">$400.00</p>
+                <div class="product-price" style="font-size:24px; margin-bottom:10px;">$199.99</div>
+                <p style="font-size:12px; color:green; margin-bottom:10px;">Ends in 05:23:10</p>
+                <a href="#" class="shop-btn" style="background-color:#ff4500; color:white;">GRAB DEAL</a>
+            </div>
+
+            <div style="margin-top:20px; background:white; padding:15px; border-radius:6px; text-align:center; border:1px solid #ddd;">
+                <h4>Join Telegram</h4>
+                <p style="font-size:13px;">Get instant alerts for loot deals.</p>
+                <a href="#" style="color:#0088cc; font-weight:bold; display:block; margin-top:5px;">Join Now</a>
+            </div>
+        </aside>
+
+    </div>
+
+    <footer>
+        <div class="footer-links">
+            <a href="#">About Us</a>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms & Conditions</a>
+            <a href="#">Contact Us</a>
+        </div>
+        <p>&copy; 2026 BestDeals Affiliate Hub. All rights reserved.</p>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+        import { getFirestore, collection, onSnapshot } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+
+        // --- FIREBASE SETUP ---
+{
+  apiKey: "AIzaSyBIQdCK0qH2psB0oQUMW8lCLwZTP5RqZH0",
+  authDomain: "affiliate-hub-4def4.firebaseapp.com",
+  projectId: "affiliate-hub-4def4",
+  storageBucket: "affiliate-hub-4def4.firebasestorage.app",
+  messagingSenderId: "592761451744",
+  appId: "1:592761451744:web:21c63413cd5d86d5f24c85",
+  measurementId: "G-S5JPPHJE9X"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+// You can just use a static name for your app ID now
+const appId = 'my-affiliate-shop';
+
+        // 1. Authenticate (Anonymous is enough for reading public data)
+        async function initAuth() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Auth Error:", error);
+            }
+        }
+
+        // 2. Fetch Data from Cloud
+        function startDataListener(user) {
+            if (!user) return;
+            const productsRef = collection(db, 'artifacts', appId, 'public', 'data', 'products');
+            
+            onSnapshot(productsRef, (snapshot) => {
+                const products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                // Sort (Newest first)
+                products.sort((a,b) => b.createdAt - a.createdAt);
+                
+                renderProducts(products);
+                
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('productGrid').style.display = 'grid';
+            }, (error) => {
+                console.error("Data Error:", error);
+            });
+        }
+
+        initAuth();
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                startDataListener(user);
+            }
+        });
+
+        // 3. Render Logic
+        function renderProducts(products) {
+            const grid = document.getElementById('productGrid');
+            grid.innerHTML = '';
+            
+            if(products.length === 0) {
+                document.getElementById('noResults').innerText = "No products loaded yet.";
+                document.getElementById('noResults').style.display = 'block';
+                return;
+            }
+
+            products.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.setAttribute('data-category', p.category);
+                
+                // Use fallback if image fails or is empty
+                const imgSrc = p.img || 'https://placehold.co/200x200?text=No+Image';
+
+                card.innerHTML = `
+                    <img src="${imgSrc}" alt="Product" onerror="this.src='https://placehold.co/200x200?text=Error'">
+                    <div class="product-title">${p.name}</div>
+                    <div class="product-price">$${Number(p.price).toFixed(2)}</div>
+                    <a href="${p.link || '#'}" target="_blank" class="shop-btn">Buy Now</a>
+                `;
+                grid.appendChild(card);
+            });
+
+            // Re-run filter in case we are on a category page
+            filterProducts();
+        }
+
+        // --- FILTER & UI LOGIC (Existing) ---
+
+        window.toggleMenu = function() {
+            const menu = document.getElementById('sideMenu');
+            const overlay = document.getElementById('overlay');
+            menu.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        window.filterProducts = function() {
+            let hash = window.location.hash.substring(1); 
+            if(!hash) hash = 'store';
+
+            const products = document.querySelectorAll('.product-card');
+            const title = document.getElementById('sectionTitle');
+            const noResults = document.getElementById('noResults');
+            let visibleCount = 0;
+
+            if(hash === 'store') {
+                title.innerText = 'All Products';
+            } else if (hash === 'daily') {
+                title.innerText = 'Daily Deals';
+            } else {
+                title.innerText = hash.charAt(0).toUpperCase() + hash.slice(1);
+            }
+
+            products.forEach(p => {
+                const category = p.getAttribute('data-category');
+                
+                if (hash === 'store' || category === hash) {
+                    p.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    p.style.display = 'none';
+                }
+            });
+
+            // Only show 'No Results' if we actually have products loaded but none match filter
+            if(products.length > 0 && visibleCount === 0) {
+                noResults.style.display = 'block';
+            } else {
+                noResults.style.display = 'none';
+            }
+        }
+
+        window.openLogin = function() {
+            document.getElementById('authOverlay').style.display = 'flex';
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('signupForm').style.display = 'none';
+            document.getElementById('otpForm').style.display = 'none';
+        }
+
+        window.openSignup = function() {
+            document.getElementById('authOverlay').style.display = 'flex';
+            document.getElementById('signupForm').style.display = 'block';
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('otpForm').style.display = 'none';
+        }
+
+        window.closeAuthModal = function() {
+            document.getElementById('authOverlay').style.display = 'none';
+        }
+
+        window.handleLoginSubmit = function(e) {
+            e.preventDefault();
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('otpForm').style.display = 'block';
+        }
+
+        window.handleSignupSubmit = function(e) {
+            e.preventDefault();
+            document.getElementById('signupForm').style.display = 'none';
+            document.getElementById('otpForm').style.display = 'block';
+        }
+
+        window.verifyOTP = function(e) {
+            e.preventDefault();
+            alert('Verification Successful!');
+            closeAuthModal();
+        }
+
+        window.addEventListener('hashchange', filterProducts);
+        // We don't need 'load' listener for render because Firebase listener handles it
+    </script>
+</body>
+</html>
