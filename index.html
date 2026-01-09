@@ -261,7 +261,10 @@
             padding: 10px;
             text-align: center;
             transition: transform 0.2s;
+            animation: fadeIn 0.5s ease-in;
         }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .product-card:hover {
             transform: translateY(-5px);
@@ -415,6 +418,13 @@
             color: #ff4500;
             font-weight: bold;
         }
+        
+        /* Loading Spinner */
+        .loader {
+            border: 5px solid #f3f3f3; border-top: 5px solid #ff4500; border-radius: 50%;
+            width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 50px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* --- 7. FOOTER --- */
         footer {
@@ -601,65 +611,10 @@
         <main class="products-section">
             <h2 class="section-title" id="sectionTitle">Latest Drops</h2>
             
-            <div class="product-grid" id="productGrid">
-                <!-- Electronics -->
-                <div class="product-card" data-category="electronics">
-                    <img src="https://placehold.co/200x200?text=Phone" alt="Product">
-                    <div class="product-title">Smartphone 5G 128GB</div>
-                    <div class="product-price">$299.00</div>
-                    <a href="#" class="shop-btn">Buy Now</a>
-                </div>
-
-                <div class="product-card" data-category="electronics">
-                    <img src="https://placehold.co/200x200?text=Headphones" alt="Product">
-                    <div class="product-title">Wireless Headphones</div>
-                    <div class="product-price">$59.00</div>
-                    <a href="#" class="shop-btn">Buy Now</a>
-                </div>
-
-                <div class="product-card" data-category="electronics">
-                    <img src="https://placehold.co/200x200?text=Watch" alt="Product">
-                    <div class="product-title">Smart Watch Fitness</div>
-                    <div class="product-price">$35.00</div>
-                    <a href="#" class="shop-btn">Buy Now</a>
-                </div>
-
-                <div class="product-card" data-category="electronics">
-                    <img src="https://placehold.co/200x200?text=Laptop" alt="Product">
-                    <div class="product-title">Gaming Laptop 16GB</div>
-                    <div class="product-price">$899.00</div>
-                    <a href="#" class="shop-btn">Buy Now</a>
-                </div>
-                
-                 <div class="product-card" data-category="electronics">
-                    <img src="https://placehold.co/200x200?text=Camera" alt="Product">
-                    <div class="product-title">Action Camera 4K</div>
-                    <div class="product-price">$120.00</div>
-                    <a href="#" class="shop-btn">Buy Now</a>
-                </div>
-
-                <!-- Fashion -->
-                <div class="product-card" data-category="fashion">
-                    <img src="https://placehold.co/200x200?text=Shoe" alt="Product">
-                    <div class="product-title">Running Shoes Air</div>
-                    <div class="product-price">$85.00</div>
-                    <a href="#" class="shop-btn">Buy Now</a>
-                </div>
-
-                <div class="product-card" data-category="fashion">
-                    <img src="https://placehold.co/200x200?text=Bag" alt="Product">
-                    <div class="product-title">Travel Backpack Waterproof</div>
-                    <div class="product-price">$45.00</div>
-                    <a href="#" class="shop-btn">Buy Now</a>
-                </div>
-
-                <!-- Home -->
-                 <div class="product-card" data-category="home">
-                    <img src="https://placehold.co/200x200?text=Blender" alt="Product">
-                    <div class="product-title">Kitchen Blender</div>
-                    <div class="product-price">$30.00</div>
-                    <a href="#" class="shop-btn">Buy Now</a>
-                </div>
+            <div id="loader" class="loader"></div>
+            
+            <div class="product-grid" id="productGrid" style="display:none;">
+                <!-- Javascript will populate products here -->
             </div>
             
             <div id="noResults" style="display:none; text-align:center; padding: 40px; color:#666;">
@@ -699,73 +654,109 @@
         <p>&copy; 2026 BestDeals Affiliate Hub. All rights reserved.</p>
     </footer>
 
-    <script>
-        // --- AUTHENTICATION MODAL LOGIC ---
-        function openLogin() {
-            document.getElementById('authOverlay').style.display = 'flex';
-            document.getElementById('loginForm').style.display = 'block';
-            document.getElementById('signupForm').style.display = 'none';
-            document.getElementById('otpForm').style.display = 'none';
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+        import { getFirestore, collection, onSnapshot } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+
+        // --- FIREBASE SETUP ---
+const firebaseConfig = {
+  apiKey: "AIzaSyD...",       // <--- PASTE YOUR REAL KEYS HERE
+  authDomain: "your-project.firebaseapp.com",
+  projectId: "your-project",
+  storageBucket: "your-project.firebasestorage.app",
+  messagingSenderId: "123...",
+  appId: "1:123..."
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+// You can just use a static name for your app ID now
+const appId = 'my-affiliate-shop';
+
+        // 1. Authenticate (Anonymous is enough for reading public data)
+        async function initAuth() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Auth Error:", error);
+            }
         }
 
-        function openSignup() {
-            document.getElementById('authOverlay').style.display = 'flex';
-            document.getElementById('signupForm').style.display = 'block';
-            document.getElementById('loginForm').style.display = 'none';
-            document.getElementById('otpForm').style.display = 'none';
+        // 2. Fetch Data from Cloud
+        function startDataListener(user) {
+            if (!user) return;
+            const productsRef = collection(db, 'artifacts', appId, 'public', 'data', 'products');
+            
+            onSnapshot(productsRef, (snapshot) => {
+                const products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                // Sort (Newest first)
+                products.sort((a,b) => b.createdAt - a.createdAt);
+                
+                renderProducts(products);
+                
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('productGrid').style.display = 'grid';
+            }, (error) => {
+                console.error("Data Error:", error);
+            });
         }
 
-        function closeAuthModal() {
-            document.getElementById('authOverlay').style.display = 'none';
+        initAuth();
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                startDataListener(user);
+            }
+        });
+
+        // 3. Render Logic
+        function renderProducts(products) {
+            const grid = document.getElementById('productGrid');
+            grid.innerHTML = '';
+            
+            if(products.length === 0) {
+                document.getElementById('noResults').innerText = "No products loaded yet.";
+                document.getElementById('noResults').style.display = 'block';
+                return;
+            }
+
+            products.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.setAttribute('data-category', p.category);
+                
+                // Use fallback if image fails or is empty
+                const imgSrc = p.img || 'https://placehold.co/200x200?text=No+Image';
+
+                card.innerHTML = `
+                    <img src="${imgSrc}" alt="Product" onerror="this.src='https://placehold.co/200x200?text=Error'">
+                    <div class="product-title">${p.name}</div>
+                    <div class="product-price">$${Number(p.price).toFixed(2)}</div>
+                    <a href="${p.link || '#'}" target="_blank" class="shop-btn">Buy Now</a>
+                `;
+                grid.appendChild(card);
+            });
+
+            // Re-run filter in case we are on a category page
+            filterProducts();
         }
 
-        function handleLoginSubmit(e) {
-            e.preventDefault();
-            // In a real app, validate credentials here.
-            // For now, proceed to OTP
-            document.getElementById('loginForm').style.display = 'none';
-            document.getElementById('otpForm').style.display = 'block';
-        }
+        // --- FILTER & UI LOGIC (Existing) ---
 
-        function handleSignupSubmit(e) {
-            e.preventDefault();
-            // In a real app, validate and create user here.
-            // For now, proceed to OTP
-            document.getElementById('signupForm').style.display = 'none';
-            document.getElementById('otpForm').style.display = 'block';
-        }
-
-        function verifyOTP(e) {
-            e.preventDefault();
-            // Verify OTP Logic
-            alert('Verification Successful! You are now logged in.');
-            closeAuthModal();
-        }
-
-        // --- EXISTING LOGIC ---
-
-        // 1. Toggle Hamburger Menu
-        function toggleMenu() {
+        window.toggleMenu = function() {
             const menu = document.getElementById('sideMenu');
             const overlay = document.getElementById('overlay');
             menu.classList.toggle('active');
             overlay.classList.toggle('active');
         }
 
-        // 2. Simple Image Slider Logic
-        let currentSlide = 0;
-        const slides = document.querySelectorAll('.slide');
-        
-        function showNextSlide() {
-            slides[currentSlide].classList.remove('active');
-            currentSlide = (currentSlide + 1) % slides.length;
-            slides[currentSlide].classList.add('active');
-        }
-        setInterval(showNextSlide, 4000);
-
-        // 3. Category Filter Logic
-        function filterProducts() {
-            // Get hash from URL (e.g., #electronics) or default to #store
+        window.filterProducts = function() {
             let hash = window.location.hash.substring(1); 
             if(!hash) hash = 'store';
 
@@ -774,21 +765,17 @@
             const noResults = document.getElementById('noResults');
             let visibleCount = 0;
 
-            // Update Title based on Hash
             if(hash === 'store') {
                 title.innerText = 'All Products';
             } else if (hash === 'daily') {
                 title.innerText = 'Daily Deals';
             } else {
-                // Capitalize first letter
                 title.innerText = hash.charAt(0).toUpperCase() + hash.slice(1);
             }
 
-            // Loop through products and show/hide
             products.forEach(p => {
                 const category = p.getAttribute('data-category');
                 
-                // Show if "store" (all) OR matches category
                 if (hash === 'store' || category === hash) {
                     p.style.display = 'block';
                     visibleCount++;
@@ -797,19 +784,52 @@
                 }
             });
 
-            // Show "No Results" message if empty
-            if(visibleCount === 0) {
+            // Only show 'No Results' if we actually have products loaded but none match filter
+            if(products.length > 0 && visibleCount === 0) {
                 noResults.style.display = 'block';
             } else {
                 noResults.style.display = 'none';
             }
         }
 
-        // Listen for hash changes (when user clicks menu links)
+        window.openLogin = function() {
+            document.getElementById('authOverlay').style.display = 'flex';
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('signupForm').style.display = 'none';
+            document.getElementById('otpForm').style.display = 'none';
+        }
+
+        window.openSignup = function() {
+            document.getElementById('authOverlay').style.display = 'flex';
+            document.getElementById('signupForm').style.display = 'block';
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('otpForm').style.display = 'none';
+        }
+
+        window.closeAuthModal = function() {
+            document.getElementById('authOverlay').style.display = 'none';
+        }
+
+        window.handleLoginSubmit = function(e) {
+            e.preventDefault();
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('otpForm').style.display = 'block';
+        }
+
+        window.handleSignupSubmit = function(e) {
+            e.preventDefault();
+            document.getElementById('signupForm').style.display = 'none';
+            document.getElementById('otpForm').style.display = 'block';
+        }
+
+        window.verifyOTP = function(e) {
+            e.preventDefault();
+            alert('Verification Successful!');
+            closeAuthModal();
+        }
+
         window.addEventListener('hashchange', filterProducts);
-        
-        // Run on initial load
-        window.addEventListener('load', filterProducts);
+        // We don't need 'load' listener for render because Firebase listener handles it
     </script>
 </body>
 </html>
